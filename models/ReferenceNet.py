@@ -605,16 +605,17 @@ class ReferenceNet(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin):
             self.up_blocks.append(up_block)
             prev_output_channel = output_channel
 
-        # why? diff vs diffusers-0.21.4/src/diffusers/models/unet_2d_condition.py
-        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q = _LoRACompatibleLinear()
-        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k = _LoRACompatibleLinear()
-        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v = _LoRACompatibleLinear()
-        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out = nn.ModuleList([Identity(), Identity()])
-        self.up_blocks[3].attentions[2].transformer_blocks[0].norm2 = Identity()
-        self.up_blocks[3].attentions[2].transformer_blocks[0].attn2 = None
-        self.up_blocks[3].attentions[2].transformer_blocks[0].norm3 = Identity()
-        self.up_blocks[3].attentions[2].transformer_blocks[0].ff = Identity()
-        self.up_blocks[3].attentions[2].proj_out = Identity()
+        # # why? diff vs diffusers-0.21.4/src/diffusers/models/unet_2d_condition.py
+        # # skip last cross attention for slight acceleration
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q = _LoRACompatibleLinear()
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k = _LoRACompatibleLinear()
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v = _LoRACompatibleLinear()
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out = nn.ModuleList([Identity(), Identity()])
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].norm2 = Identity()
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn2 = None
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].norm3 = Identity()
+        # self.up_blocks[3].attentions[2].transformer_blocks[0].ff = Identity()
+        # self.up_blocks[3].attentions[2].proj_out = Identity()
 
         if attention_type in ["gated", "gated-text-image"]:
             positive_len = 768

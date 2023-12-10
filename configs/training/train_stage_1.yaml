@@ -1,0 +1,59 @@
+image_finetune: true
+
+output_dir: "outputs"
+pretrained_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/stable-diffusion-v1-5"
+clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+
+
+noise_scheduler_kwargs:
+  num_train_timesteps: 1000
+  beta_start:          0.00085
+  beta_end:            0.012
+  beta_schedule:       "scaled_linear"
+  steps_offset:        1
+  clip_sample:         false
+
+description: "### train info: train stage 1: image pretrain ###"
+
+train_data:
+  csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv"
+  video_folder: "/mnt/f/research/HumanVideo/TikTok_dataset"
+  sample_size:  256
+  sample_stride: 4
+  sample_n_frames: 16
+  clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+
+validation_data:
+  prompts:
+    - "Snow rocky mountains peaks canyon. Snow blanketed rocky mountains surround and shadow deep canyons."
+    - "A drone view of celebration with Christma tree and fireworks, starry sky - background."
+    - "Robot dancing in times square."
+    - "Pacific coast, carmel by the sea ocean and waves."
+  num_inference_steps: 25
+  guidance_scale: 8.
+
+trainable_modules:
+  - "."
+
+unet_checkpoint_path: ""
+
+fusion_blocks: "full"
+
+learning_rate:    1.e-4
+train_batch_size: 1
+
+max_train_epoch:      -1
+max_train_steps:      30000
+checkpointing_epochs: -1
+checkpointing_steps:  60
+gradient_accumulation_steps: 16
+
+
+validation_steps:       5000
+validation_steps_tuple: [2, 50]
+
+global_seed: 42
+mixed_precision_training: true
+enable_xformers_memory_efficient_attention: True
+
+is_debug: False

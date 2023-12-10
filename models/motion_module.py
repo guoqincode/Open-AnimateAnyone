@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from diffusers.utils import BaseOutput
-# from diffusers.utils.import_utils import is_xformers_available
+from diffusers.utils.import_utils import is_xformers_available
 from diffusers.models.attention import FeedForward
 from .orig_attention import CrossAttention
 
@@ -26,11 +26,11 @@ class TemporalTransformer3DModelOutput(BaseOutput):
     sample: torch.FloatTensor
 
 
-# if is_xformers_available():
-#     import xformers
-#     import xformers.ops
-# else:
-#     xformers = None
+if is_xformers_available():
+    import xformers
+    import xformers.ops
+else:
+    xformers = None
 
 
 def get_motion_module(

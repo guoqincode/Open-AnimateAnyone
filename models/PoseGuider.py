@@ -6,7 +6,7 @@ from einops import rearrange
 
 
 class PoseGuider(nn.Module):
-    def __init__(self, noise_latent_channels):
+    def __init__(self, noise_latent_channels=4):
         super(PoseGuider, self).__init__()
 
         self.conv_layers = nn.Sequential(
@@ -39,16 +39,8 @@ class PoseGuider(nn.Module):
             init.zeros_(self.final_proj.bias)
 
     def forward(self, pose_image):
-        original_shape = pose_image.shape
-        if len(original_shape) == 5:
-            # if input video
-            pose_image = rearrange(pose_image, 'b f c h w -> (b f) c h w')
-
         x = self.conv_layers(pose_image)
         x = self.final_proj(x)
-
-        if len(original_shape) == 5:
-            x = rearrange(x, '(b f) c h w -> b f c h w', b=original_shape[0], f=original_shape[1])
 
         return x
 

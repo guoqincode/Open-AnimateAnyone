@@ -28,6 +28,7 @@ class ReferenceNetAttention():
                  reference_attn=True,
                  fusion_blocks="full",
                  batch_size=1, 
+                 is_image=False,
                  ) -> None:
         # 10. Modify self attention and group norm
         self.unet = unet
@@ -44,6 +45,7 @@ class ReferenceNetAttention():
             reference_attn,
             fusion_blocks,
             batch_size=batch_size, 
+            is_image=is_image,
         )
 
     def register_reference_hooks(
@@ -59,6 +61,7 @@ class ReferenceNetAttention():
             num_images_per_prompt=1, 
             device=torch.device("cpu"), 
             fusion_blocks='midup',
+            is_image=False,
         ):
         MODE = mode
         do_classifier_free_guidance = do_classifier_free_guidance
@@ -121,7 +124,8 @@ class ReferenceNetAttention():
                         **cross_attention_kwargs,
                     )
                 if MODE == "read":
-                    self.bank = [rearrange(d.unsqueeze(1).repeat(1, video_length, 1, 1), "b t l c -> (b t) l c")[:hidden_states.shape[0]] for d in self.bank]
+                    if not is_image:
+                        self.bank = [rearrange(d.unsqueeze(1).repeat(1, video_length, 1, 1), "b t l c -> (b t) l c")[:hidden_states.shape[0]] for d in self.bank]
                     # modify Reference Sec 3.2.2
                     modify_norm_hidden_states = torch.cat([norm_hidden_states] + self.bank, dim=1)
                     hidden_states_uc = self.attn1(modify_norm_hidden_states, 
@@ -164,14 +168,15 @@ class ReferenceNetAttention():
                     hidden_states = self.ff(self.norm3(hidden_states)) + hidden_states
 
                     # Temporal-Attention
-                    if self.unet_use_temporal_attention:
-                        d = hidden_states.shape[1]
-                        hidden_states = rearrange(hidden_states, "(b f) d c -> (b d) f c", f=video_length)
-                        norm_hidden_states = (
-                            self.norm_temp(hidden_states, timestep) if self.use_ada_layer_norm else self.norm_temp(hidden_states)
-                        )
-                        hidden_states = self.attn_temp(norm_hidden_states) + hidden_states
-                        hidden_states = rearrange(hidden_states, "(b d) f c -> (b f) d c", d=d)
+                    if not is_image:
+                        if self.unet_use_temporal_attention:
+                            d = hidden_states.shape[1]
+                            hidden_states = rearrange(hidden_states, "(b f) d c -> (b d) f c", f=video_length)
+                            norm_hidden_states = (
+                                self.norm_temp(hidden_states, timestep) if self.use_ada_layer_norm else self.norm_temp(hidden_states)
+                            )
+                            hidden_states = self.attn_temp(norm_hidden_states) + hidden_states
+                            hidden_states = rearrange(hidden_states, "(b d) f c -> (b f) d c", d=d)
 
                     return hidden_states
                 

@@ -449,7 +449,7 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
     def from_pretrained_2d(cls, pretrained_model_path, subfolder=None, unet_additional_kwargs=None):
         if subfolder is not None:
             pretrained_model_path = os.path.join(pretrained_model_path, subfolder)
-        print(f"loaded temporal unet's pretrained weights from {pretrained_model_path} ...")
+        print(f"loaded temporal unet's pretrained weights from {pretrained_model_path}")
 
         config_file = os.path.join(pretrained_model_path, 'config.json')
         if not os.path.isfile(config_file):
@@ -479,7 +479,7 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
 
         m, u = model.load_state_dict(state_dict, strict=False)
         print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)};")
-        # print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n")
+        print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n")
         
         params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
         print(f"### Temporal Module Parameters: {sum(params) / 1e6} M")
