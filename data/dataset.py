@@ -13,10 +13,6 @@ from transformers import CLIPProcessor
 
 # adapt from https://github.com/guoyww/AnimateDiff/blob/main/animatediff/data/dataset.py
 
-# https://github.com/tencent-ailab/IP-Adapter/blob/main/tutorial_train.py#L59C61-L59C61
-# 在dataset这里直接就返回参考图像的process后的
-# 那还需要稍微改一下 ReferenceEncoder, 只保留一个clip即可
-
 import torch.distributed as dist
 def zero_rank_print(s):
     if (not dist.is_initialized()) and (dist.is_initialized() and dist.get_rank() == 0): print("### " + s)
@@ -128,7 +124,7 @@ class TikTok(Dataset):
         
         return sample
 
-# dataloader 返回形式
+
 # https://github.com/tencent-ailab/IP-Adapter/blob/main/tutorial_train.py#L341
 
 def collate_fn(data):
@@ -150,7 +146,7 @@ def collate_fn(data):
         "pixel_values_ref_img": pixel_values_ref_img
     }
 
-# # ip-adapter dataloader 返回形式
+# # ip-adapter collate_fn
 # def collate_fn(data):
 #     images = torch.stack([example["image"] for example in data])
 #     text_input_ids = torch.cat([example["text_input_ids"] for example in data], dim=0)
@@ -213,9 +209,7 @@ if __name__ == "__main__":
     
     dataloader = torch.utils.data.DataLoader(dataset, collate_fn=collate_fn,batch_size=4, num_workers=0,)
     # dataloader = torch.utils.data.DataLoader(dataset,batch_size=1, num_workers=0,)
-    # print(dataloader)
-    # 卡在 self._next_data()
-    # 读取不了dataloader里边的数据
+
     for idx, batch in enumerate(dataloader):
         print(idx)
         # print(batch["pixel_values"])

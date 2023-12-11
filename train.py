@@ -478,6 +478,7 @@ def main(
             progress_bar.update(1)
             
             reference_control_reader.clear()
+            reference_control_writer.clear()
             global_step += 1
             
             ### <<<< Training <<<< ###

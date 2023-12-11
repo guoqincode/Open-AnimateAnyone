@@ -3,7 +3,8 @@ image_finetune: true
 output_dir: "outputs"
 pretrained_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/stable-diffusion-v1-5"
 clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
-
+poseguider_checkpoint_path: ""
+referencenet_checkpoint_path: ""
 
 noise_scheduler_kwargs:
   num_train_timesteps: 1000
@@ -45,7 +46,7 @@ train_batch_size: 1
 max_train_epoch:      -1
 max_train_steps:      30000
 checkpointing_epochs: -1
-checkpointing_steps:  60
+checkpointing_steps:  10000
 gradient_accumulation_steps: 16
 
 

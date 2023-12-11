@@ -54,32 +54,23 @@ def process(dwprocessor, input_image, detect_resolution):
 
 dwprocessor = DWposeDetector()
 
-# 定义数据集文件夹路径
+# your dataset path
 dataset_folder = '../../TikTok_dataset'
 detect_resolution = 768
-
 all_files = os.listdir(dataset_folder)
-# all_files.reverse()
 
-# all_files = all_files[140:240]
-
-# 遍历数据集文件夹中的所有子文件夹
 for folder in tqdm(all_files):
     folder_path = os.path.join(dataset_folder, folder)
     image_folder = os.path.join(folder_path, 'images')
     output_folder = os.path.join(folder_path, 'dwpose')
 
     if os.path.exists(output_folder):
-        # 其他线程已经处理过了
         continue
 
-    # 如果image文件夹存在
     if os.path.exists(image_folder) and os.path.isdir(image_folder):
-        # 确保dwpose文件夹存在
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        # 遍历image文件夹中的所有图像
         for image_name in tqdm(os.listdir(image_folder),desc=f"process {folder}"):
             image_path = os.path.join(image_folder, image_name)
             output_path = os.path.join(output_folder, image_name)
