@@ -8,6 +8,7 @@ Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/mai
 
 ## ToDo
 - [x] **Release Training Code.**
+- [ ] DeepSpeed + Accelerator Training
 - [ ] **Release Inference Code and unofficial pre-trained weights.**
 - [ ] **Data Release (Within Legal Boundaries)**: Efforts to collect and refine the dataset for further training and improvements are ongoing, with the intention to release it publicly, adhering to legal constraints.
 
