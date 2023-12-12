@@ -34,7 +34,7 @@ validation_data:
   guidance_scale: 8.
 
 trainable_modules:
-  - "."
+  - "motion_modules."
 
 unet_checkpoint_path: ""
 
