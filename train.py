@@ -35,7 +35,7 @@ import transformers
 from transformers import CLIPTextModel, CLIPTokenizer
 
 # from data.dataset import WebVid10M
-from data.dataset import TikTok,collate_fn
+from data.dataset import TikTok, collate_fn, UBC_Fashion
 from models.unet import UNet3DConditionModel
 # from animatediff.pipelines.pipeline_animation import AnimationPipeline
 from utils.util import save_videos_grid, zero_rank_print
@@ -225,6 +225,7 @@ def main(
     for name, param in unet.named_parameters():
         for trainable_module_name in trainable_modules:
             if trainable_module_name in name:
+                print(trainable_module_name)
                 param.requires_grad = True
                 break
     
@@ -279,6 +280,7 @@ def main(
     # Get the training dataset
     # train_dataset = WebVid10M(**train_data, is_image=image_finetune)
     train_dataset = TikTok(**train_data, is_image=image_finetune)
+    train_dataset = UBC_Fashion(**train_data, is_image=image_finetune)
     
     distributed_sampler = DistributedSampler(
         train_dataset,
@@ -334,7 +336,7 @@ def main(
 
     # DDP warpper
     unet.to(local_rank)
-    unet = DDP(unet, device_ids=[local_rank], output_device=local_rank)
+    # unet = DDP(unet, device_ids=[local_rank], output_device=local_rank)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / gradient_accumulation_steps)
@@ -488,7 +490,8 @@ def main(
                 wandb.log({"train_loss": loss.item()}, step=global_step)
                 
             # Save checkpoint
-            if is_main_process and (global_step % checkpointing_steps == 0 or step == len(train_dataloader) - 1):
+            # if is_main_process and (global_step % checkpointing_steps == 0 or step == len(train_dataloader) - 1):
+            if is_main_process and global_step % checkpointing_steps == 0 :
                 save_path = os.path.join(output_dir, f"checkpoints")
                 state_dict = {
                     "epoch": epoch,
