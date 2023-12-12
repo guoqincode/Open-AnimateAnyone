@@ -14,15 +14,23 @@ noise_scheduler_kwargs:
   steps_offset:        1
   clip_sample:         false
 
-description: "### train info: train stage 1: image pretrain ###"
+description: "### Train info: train stage 1: image pretrain ###"
 
 train_data:
-  csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv"
-  video_folder: "/mnt/f/research/HumanVideo/TikTok_dataset"
+  csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/UBC_train_info_test.csv"
+  video_folder: "/mnt/f/research/HumanVideo/UBC_dataset"
   sample_size:  256
   sample_stride: 4
   sample_n_frames: 16
   clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+
+# train_data:
+#   csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv"
+#   video_folder: "/mnt/f/research/HumanVideo/TikTok_dataset"
+#   sample_size:  256
+#   sample_stride: 4
+#   sample_n_frames: 16
+#   clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
 
 validation_data:
   prompts:
