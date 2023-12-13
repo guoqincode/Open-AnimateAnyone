@@ -13,7 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
-
+import os
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint
@@ -605,17 +605,37 @@ class ReferenceNet(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin):
             self.up_blocks.append(up_block)
             prev_output_channel = output_channel
 
-        # # why? diff vs diffusers-0.21.4/src/diffusers/models/unet_2d_condition.py
-        # # skip last cross attention for slight acceleration
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q = _LoRACompatibleLinear()
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k = _LoRACompatibleLinear()
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v = _LoRACompatibleLinear()
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out = nn.ModuleList([Identity(), Identity()])
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].norm2 = Identity()
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].attn2 = None
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].norm3 = Identity()
-        # self.up_blocks[3].attentions[2].transformer_blocks[0].ff = Identity()
-        # self.up_blocks[3].attentions[2].proj_out = Identity()
+        
+        # # out
+        # if norm_num_groups is not None:
+        #     self.conv_norm_out = nn.GroupNorm(
+        #         num_channels=block_out_channels[0], num_groups=norm_num_groups, eps=norm_eps
+        #     )
+
+        #     self.conv_act = get_activation(act_fn)
+
+        # else:
+        #     self.conv_norm_out = None
+        #     self.conv_act = None
+
+        # conv_out_padding = (conv_out_kernel - 1) // 2
+        # self.conv_out = nn.Conv2d(
+        #     block_out_channels[0], out_channels, kernel_size=conv_out_kernel, padding=conv_out_padding
+        # )
+        
+        # Diff vs diffusers-0.21.4/src/diffusers/models/unet_2d_condition.py
+        # skip last cross attention for slight acceleration and for DDP training
+        # The following parameters (cross-attention for the last layer) 
+        # and conv_out are not involved in the gradient calculation of the model
+        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q = _LoRACompatibleLinear()
+        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k = _LoRACompatibleLinear()
+        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v = _LoRACompatibleLinear()
+        self.up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out = nn.ModuleList([Identity(), Identity()])
+        self.up_blocks[3].attentions[2].transformer_blocks[0].norm2 = Identity()
+        self.up_blocks[3].attentions[2].transformer_blocks[0].attn2 = None
+        self.up_blocks[3].attentions[2].transformer_blocks[0].norm3 = Identity()
+        self.up_blocks[3].attentions[2].transformer_blocks[0].ff = Identity()
+        self.up_blocks[3].attentions[2].proj_out = Identity()
 
         if attention_type in ["gated", "gated-text-image"]:
             positive_len = 768
@@ -1066,3 +1086,61 @@ class ReferenceNet(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin):
             return (sample,)
 
         return UNet2DConditionOutput(sample=sample)
+    
+    @classmethod
+    def load_referencenet(cls, pretrained_model_path):
+        print(f"loaded ReferenceNet's pretrained weights from {pretrained_model_path} ...")
+
+        config = {
+            "_class_name": "UNet2DConditionModel",
+            "_diffusers_version": "0.6.0",
+            "act_fn": "silu",
+            "attention_head_dim": 8,
+            "block_out_channels": [320, 640, 1280, 1280],
+            "center_input_sample": False,
+            "cross_attention_dim": 768,
+            "down_block_types": [
+                "CrossAttnDownBlock2D",
+                "CrossAttnDownBlock2D",
+                "CrossAttnDownBlock2D",
+                "DownBlock2D"
+            ],
+            "downsample_padding": 1,
+            "flip_sin_to_cos": True,
+            "freq_shift": 0,
+            "in_channels": 4,
+            "layers_per_block": 2,
+            "mid_block_scale_factor": 1,
+            "norm_eps": 1e-05,
+            "norm_num_groups": 32,
+            "out_channels": 4,
+            "sample_size": 64,
+            "up_block_types": [
+                "UpBlock2D",
+                "CrossAttnUpBlock2D",
+                "CrossAttnUpBlock2D",
+                "CrossAttnUpBlock2D"
+            ]
+        }
+
+        # from diffusers.utils import WEIGHTS_NAME
+        model = cls.from_config(config)
+        # model_file = os.path.join(pretrained_model_path, WEIGHTS_NAME)
+        model_file = pretrained_model_path
+        
+        if not os.path.isfile(model_file):
+            raise RuntimeError(f"{model_file} does not exist")
+        state_dict = torch.load(model_file, map_location="cpu")
+
+        m, u = model.load_state_dict(state_dict, strict=False)
+        if m or u:
+            print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)};")
+            print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n")
+        
+        # params = [p.numel() for n, p in model.named_parameters() if "2D" in n]
+        # print(f"### 2D Module Parameters: {sum(params) / 1e6} M")
+        
+        params = [p.numel() for n, p in model.named_parameters()]
+        print(f"### Module Parameters: {sum(params) / 1e6} M")
+        
+        return model
