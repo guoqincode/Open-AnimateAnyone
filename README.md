@@ -6,7 +6,7 @@ This repository contains an simple and unofficial implementation of [Animate Any
 ## Note !!!
 This project is under continuous development in part-time, there may be bugs in the code, welcome to correct them, I will optimize the code after the pre-trained model is released!
 
-## Requirments
+## Requirements
 Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/main).
 
 ## ToDo
