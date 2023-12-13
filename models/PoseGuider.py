@@ -45,16 +45,17 @@ class PoseGuider(nn.Module):
         return x
 
     @classmethod
-    def from_pretrained(pretrained_model_path):
+    def from_pretrained(cls,pretrained_model_path):
         if not os.path.exists(pretrained_model_path):
             print(f"There is no model file in {pretrained_model_path}")
         print(f"loaded PoseGuider's pretrained weights from {pretrained_model_path} ...")
 
         state_dict = torch.load(pretrained_model_path, map_location="cpu")
         model = PoseGuider(noise_latent_channels=4)
+                
         m, u = model.load_state_dict(state_dict, strict=False)
-        print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)};")        
-        params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
+        # print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)};")        
+        params = [p.numel() for n, p in model.named_parameters()]
         print(f"### PoseGuider's Parameters: {sum(params) / 1e6} M")
         
         return model
