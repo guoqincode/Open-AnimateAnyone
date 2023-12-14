@@ -32,6 +32,10 @@ torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_
 
 #### First Stage
 
+```python
+python3 -m pipelines.animation_stage_1 --config configs/prompts/animation_stage_1.yaml
+```
+
 #### Second Stage
 
 ## Acknowledgements
