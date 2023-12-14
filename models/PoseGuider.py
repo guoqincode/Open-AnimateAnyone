@@ -10,11 +10,22 @@ class PoseGuider(nn.Module):
         super(PoseGuider, self).__init__()
 
         self.conv_layers = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3, padding=1),
+            nn.ReLU(),
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=4, stride=2, padding=1),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2, padding=1),
             nn.ReLU(),
+
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, padding=1),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
             nn.ReLU()
@@ -38,8 +49,8 @@ class PoseGuider(nn.Module):
         if self.final_proj.bias is not None:
             init.zeros_(self.final_proj.bias)
 
-    def forward(self, pose_image):
-        x = self.conv_layers(pose_image)
+    def forward(self, x):
+        x = self.conv_layers(x)
         x = self.final_proj(x)
 
         return x
