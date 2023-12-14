@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 from einops import rearrange
-
+import numpy as np
 
 class PoseGuider(nn.Module):
     def __init__(self, noise_latent_channels=4):
@@ -37,17 +37,32 @@ class PoseGuider(nn.Module):
         # Initialize layers
         self._initialize_weights()
 
+    # def _initialize_weights(self):
+    #     # Initialize weights with Gaussian distribution and zero out the final layer
+    #     for m in self.conv_layers:
+    #         if isinstance(m, nn.Conv2d):
+    #             init.normal_(m.weight, mean=0.0, std=0.02)
+    #             if m.bias is not None:
+    #                 init.zeros_(m.bias)
+
+    #     init.zeros_(self.final_proj.weight)
+    #     if self.final_proj.bias is not None:
+    #         init.zeros_(self.final_proj.bias)
+    
     def _initialize_weights(self):
-        # Initialize weights with Gaussian distribution and zero out the final layer
+        # Initialize weights with He initialization and zero out the biases
         for m in self.conv_layers:
             if isinstance(m, nn.Conv2d):
-                init.normal_(m.weight, mean=0.0, std=0.02)
+                n = m.kernel_size[0] * m.kernel_size[1] * m.in_channels
+                init.normal_(m.weight, mean=0.0, std=np.sqrt(2. / n))
                 if m.bias is not None:
                     init.zeros_(m.bias)
 
+        # For the final projection layer, initialize weights to zero (or you may choose to use He initialization here as well)
         init.zeros_(self.final_proj.weight)
         if self.final_proj.bias is not None:
             init.zeros_(self.final_proj.bias)
+
 
     def forward(self, x):
         x = self.conv_layers(x)
