@@ -17,25 +17,14 @@ from diffusers import AutoencoderKL, DDIMScheduler, UniPCMultistepScheduler
 from tqdm import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer, CLIPProcessor
 
-# from magicanimate.models.unet_controlnet import UNet3DConditionModel
-# from magicanimate.models.controlnet import ControlNetModel
-# from magicanimate.models.appearance_encoder import AppearanceEncoderModel
-# from magicanimate.models.mutual_self_attention import ReferenceAttentionControl
-# from magicanimate.pipelines.pipeline_animation import AnimationPipeline
-
 from models.PoseGuider import PoseGuider
 from models.ReferenceEncoder import ReferenceEncoder
 from models.ReferenceNet import ReferenceNet
 from models.ReferenceNet_attention import ReferenceNetAttention
 from models.unet import UNet3DConditionModel
-# from pipelines.pipeline_animate_anyone import AnimationAnyonePipeline
 from pipelines.pipeline_stage_1 import AnimationAnyonePipeline
 from diffusers.models import UNet2DConditionModel
 
-
-# from magicanimate.utils.util import save_videos_grid
-# from magicanimate.utils.dist_tools import distributed_init
-# from magicanimate.utils.videoreader import VideoReader
 
 from utils.util import save_videos_grid
 from utils.dist_tools import distributed_init
@@ -45,6 +34,9 @@ from accelerate.utils import set_seed
 from einops import rearrange
 from pathlib import Path
 
+from decord import VideoReader as decord_VideoReader
+import cv2
+import pdb
 
 def main(args):
 
@@ -89,19 +81,21 @@ def main(args):
     
     referencenet = ReferenceNet.load_referencenet(pretrained_model_path=config.pretrained_referencenet_path)
     
-    reference_control_writer = ReferenceNetAttention(referencenet, do_classifier_free_guidance=False, mode='write', fusion_blocks=config.fusion_blocks)
-    reference_control_reader = ReferenceNetAttention(unet, do_classifier_free_guidance=False, mode='read', fusion_blocks=config.fusion_blocks)
+    # reference_control_writer = ReferenceNetAttention(referencenet, do_classifier_free_guidance=True, mode='write', fusion_blocks=config.fusion_blocks)
+    # reference_control_reader = ReferenceNetAttention(unet, do_classifier_free_guidance=True, mode='read', fusion_blocks=config.fusion_blocks)
+    reference_control_writer = None
+    reference_control_reader = None
     
 
     # unet.enable_xformers_memory_efficient_attention()
     # referencenet.enable_xformers_memory_efficient_attention()
 
-    vae.to(torch.float16).to(device)
-    unet.to(torch.float16).to(device)
-    text_encoder.to(torch.float16).to(device)
-    referencenet.to(torch.float16).to(device)
-    poseguider.to(torch.float16).to(device)
-    clip_image_encoder.to(torch.float16).to(device)
+    vae.to(torch.float32)
+    unet.to(torch.float32)
+    text_encoder.to(torch.float32)
+    referencenet.to(torch.float32).to(device)
+    poseguider.to(torch.float32).to(device)
+    clip_image_encoder.to(torch.float32).to(device)
     
     pipeline = AnimationAnyonePipeline(
         vae=vae, text_encoder=text_encoder, tokenizer=tokenizer, unet=unet,
@@ -130,7 +124,7 @@ def main(args):
     steps = [config.S] * len(test_videos)
 
     config.random_seed = []
-    prompt = n_prompt = ""
+    prompt = n_prompt = "none"
     for idx, (source_image, test_video, random_seed, size, step) in tqdm(
         enumerate(zip(source_images, test_videos, random_seeds, sizes, steps)), 
         total=len(test_videos), 
@@ -160,15 +154,18 @@ def main(args):
             source_image = np.array(Image.open(source_image).resize((size, size)))
         H, W, C = source_image.shape
         
+        
         print(f"current seed: {torch.initial_seed()}")
         init_latents = None
         
         # print(f"sampling {prompt} ...")
+        # 满足16的整数倍
         original_length = control.shape[0]
         if control.shape[0] % config.L > 0:
             control = np.pad(control, ((0, config.L-control.shape[0] % config.L), (0, 0), (0, 0), (0, 0)), mode='edge')
         
-        control = control[0]
+        idx_control = random.randint(0,control.shape[0]-1)
+        control = control[idx_control] # (256, 256, 3)
         
         generator = torch.Generator(device=torch.device("cuda:0"))
         generator.manual_seed(torch.initial_seed())
@@ -213,24 +210,44 @@ def main(args):
             **dist_kwargs,
         ).videos
 
+        
+        # print(sample.shape) # torch.Size([1, 256, 256, 3])
+        
+        
+        modify_original_length = 1
+        
         if args.rank == 0:
-            source_images = np.array([source_image] * original_length)
+            source_images = np.array([source_image] * modify_original_length)
             source_images = rearrange(torch.from_numpy(source_images), "t h w c -> 1 c t h w") / 255.0
             samples_per_video.append(source_images)
             
             control = control / 255.0
-            control = rearrange(control, "t h w c -> 1 c t h w")
+            # control = rearrange(control, "t h w c -> 1 c t h w")
+            control = rearrange(control, "h w c -> 1 c 1 h w")
             control = torch.from_numpy(control)
-            samples_per_video.append(control[:, :, :original_length])
+            
+            # add
+            sample = rearrange(sample,"1 h w c -> 1 c 1 h w")
+            
+            # pdb.set_trace()
+            
+            
+            samples_per_video.append(control[:, :, :modify_original_length])
 
-            samples_per_video.append(sample[:, :, :original_length])
-                
+            samples_per_video.append(sample[:, :, :modify_original_length])
+            
+            # print(samples_per_video.size())
+            
             samples_per_video = torch.cat(samples_per_video)
 
             video_name = os.path.basename(test_video)[:-4]
             source_name = os.path.basename(config.source_image[idx]).split(".")[0]
-            save_videos_grid(samples_per_video[-1:], f"{savedir}/videos/{source_name}_{video_name}.mp4")
-            save_videos_grid(samples_per_video, f"{savedir}/videos/{source_name}_{video_name}/grid.mp4")
+            # save_videos_grid(samples_per_video[-1:], f"{savedir}/videos/{source_name}_{video_name}.mp4")
+            save_videos_grid(samples_per_video, f"{savedir}/videos/{source_name}_{video_name}/grid.mp4",fps=1)
+            
+            vr = decord_VideoReader(f"{savedir}/videos/{source_name}_{video_name}/grid.mp4")
+            frame = vr[0].asnumpy()
+            cv2.imwrite(f"{savedir}/videos/{source_name}_{video_name}/grid.png", cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
             if config.save_individual_videos:
                 save_videos_grid(samples_per_video[1:2], f"{savedir}/videos/{source_name}_{video_name}/ctrl.mp4")
