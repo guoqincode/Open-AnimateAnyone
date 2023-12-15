@@ -2,7 +2,8 @@ image_finetune: false
 
 output_dir: "outputs"
 pretrained_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/stable-diffusion-v1-5"
-clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+# clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+clip_model_path: "../magic-animate/pretrained_models/clip-vit-large-patch14"
 poseguider_checkpoint_path: " "
 referencenet_checkpoint_path: " "
 
