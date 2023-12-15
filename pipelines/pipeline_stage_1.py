@@ -374,7 +374,7 @@ class AnimationAnyonePipeline(DiffusionPipeline):
     #     condition = torch.from_numpy(condition.copy()).to(device=device, dtype=dtype) / 255.0
     #     condition = torch.stack([condition for _ in range(num_videos_per_prompt)], dim=0)
     #     condition = rearrange(condition, 'b f h w c -> (b f) c h w').clone()
-    #     if do_classifier_free_guidance:
+    #     if do_classifier_free_guidance:x
     #         condition = torch.cat([condition] * 2)
     #     return condition
 
@@ -706,14 +706,6 @@ class AnimationAnyonePipeline(DiffusionPipeline):
         
         context_scheduler = get_context_scheduler(context_schedule)
         
-        # def prepare_condition(self, condition, num_videos_per_prompt, device, dtype, do_classifier_free_guidance):
-            #     # prepare conditions for controlnet
-            #     condition = torch.from_numpy(condition.copy()).to(device=device, dtype=dtype) / 255.0
-            #     condition = torch.stack([condition for _ in range(num_videos_per_prompt)], dim=0)
-            #     condition = rearrange(condition, 'b f h w c -> (b f) c h w').clone()
-            #     if do_classifier_free_guidance:
-            #         condition = torch.cat([condition] * 2)
-            #     return condition
         
         #### pose condition ####
         pixel_transforms = transforms.Compose([
@@ -741,15 +733,17 @@ class AnimationAnyonePipeline(DiffusionPipeline):
         
         for i, t in tqdm(enumerate(timesteps), total=len(timesteps), disable=(rank!=0)):
             
-            print("### ",i," : ",latents.size(),latents.min(),latents.max()," ###")
+            # print("### ",i," : ",latents.size(),latents.min(),latents.max()," ###")
+            # print(t)
             
-            referencenet(
-                ref_image_latents.repeat(context_batch_size * (2 if do_classifier_free_guidance else 1), 1, 1, 1),
-                t,
-                encoder_hidden_states=image_embeddings,
-                return_dict=False,
-            )
-            reference_control_reader.update(reference_control_writer)
+            if i == 0:
+                referencenet(
+                    ref_image_latents.repeat(context_batch_size * (2 if do_classifier_free_guidance else 1), 1, 1, 1),
+                    torch.zeros_like(t),
+                    encoder_hidden_states=image_embeddings,
+                    return_dict=False,
+                )
+                reference_control_reader.update(reference_control_writer)
 
             latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
             latent_model_input = self.scheduler.scale_model_input(latent_model_input, t) + latents_pose
@@ -767,153 +761,6 @@ class AnimationAnyonePipeline(DiffusionPipeline):
             
             latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs, return_dict=False)[0]
             
-            reference_control_writer.clear()
-            reference_control_reader.clear()
-            
-            # pass
-        
-        
-        
-        # # Denoising loop
-        # for i, t in tqdm(enumerate(timesteps), total=len(timesteps), disable=(rank!=0)):
-        #     if num_actual_inference_steps is not None and i < num_inference_steps - num_actual_inference_steps:
-        #         continue
-
-        #     noise_pred = torch.zeros(
-        #         (latents.shape[0] * (2 if do_classifier_free_guidance else 1), *latents.shape[1:]),
-        #         device=latents.device,
-        #         dtype=latents.dtype,
-        #     )
-        #     counter = torch.zeros(
-        #         (1, 1, latents.shape[2], 1, 1), device=latents.device, dtype=latents.dtype
-        #     )
-
-            
-            
-        #     # appearance_encoder(
-        #     #     ref_image_latents.repeat(context_batch_size * (2 if do_classifier_free_guidance else 1), 1, 1, 1),
-        #     #     t,
-        #     #     encoder_hidden_states=text_embeddings,
-        #     #     return_dict=False,
-        #     # )
-            
-        #     referencenet(
-        #         ref_image_latents.repeat(context_batch_size * (2 if do_classifier_free_guidance else 1), 1, 1, 1),
-        #         t,
-        #         encoder_hidden_states=image_embeddings,
-        #         return_dict=False,
-        #     )
-            
-        #     context_queue = list(context_scheduler(
-        #         0, num_inference_steps, latents.shape[2], context_frames, context_stride, 0
-        #     ))
-        #     num_context_batches = math.ceil(len(context_queue) / context_batch_size)
-        #     # for i in range(num_context_batches):
-        #     #     context = context_queue[i*context_batch_size: (i+1)*context_batch_size]
-        #     #     # expand the latents if we are doing classifier free guidance
-        #     #     controlnet_latent_input = (
-        #     #         torch.cat([latents[:, :, c] for c in context])
-        #     #         .to(device)
-        #     #     )
-        #     #     controlnet_latent_input = self.scheduler.scale_model_input(controlnet_latent_input, t)
-
-        #     #     # prepare inputs for controlnet
-        #     #     b, c, f, h, w = controlnet_latent_input.shape
-        #     #     controlnet_latent_input = rearrange(controlnet_latent_input, "b c f h w -> (b f) c h w")
-                
-        #     #     # controlnet inference
-        #     #     down_block_res_samples, mid_block_res_sample = self.controlnet(
-        #     #         controlnet_latent_input,
-        #     #         t,
-        #     #         encoder_hidden_states=torch.cat([controlnet_text_embeddings_c[c] for c in context]),
-        #     #         controlnet_cond=torch.cat([controlnet_cond_images[c] for c in context]),
-        #     #         conditioning_scale=controlnet_conditioning_scale,
-        #     #         return_dict=False,
-        #     #     )
-
-        #     #     for j, k in enumerate(np.concatenate(np.array(context))):
-        #     #         controlnet_res_samples_cache_dict[k] = ([sample[j:j+1] for sample in down_block_res_samples], mid_block_res_sample[j:j+1])
-
-        #     context_queue = list(context_scheduler(
-        #         0, num_inference_steps, latents.shape[2], context_frames, context_stride, context_overlap
-        #     ))
-
-        #     num_context_batches = math.ceil(len(context_queue) / context_batch_size)
-        #     global_context = []
-        #     for i in range(num_context_batches):
-        #         global_context.append(context_queue[i*context_batch_size: (i+1)*context_batch_size])
-            
-        #     for context in global_context[rank::world_size]:
-        #         # expand the latents if we are doing classifier free guidance
-        #         latent_model_input = (
-        #             torch.cat([latents[:, :, c] for c in context])
-        #             .to(device)
-        #             .repeat(2 if do_classifier_free_guidance else 1, 1, 1, 1, 1)
-        #         )
-                
-        #         latent_model_input = self.scheduler.scale_model_input(latent_model_input + latents_pose, t)
-
-        #         b, c, f, h, w = latent_model_input.shape
-        #         # down_block_res_samples, mid_block_res_sample = self.select_controlnet_res_samples(
-        #         #     controlnet_res_samples_cache_dict, 
-        #         #     context,
-        #         #     do_classifier_free_guidance,
-        #         #     b, f
-        #         # )
-                
-        #         reference_control_reader.update(reference_control_writer)
-        #         pred = self.unet(
-        #             latent_model_input, 
-        #             t, 
-        #             encoder_hidden_states=image_embeddings[:b],
-        #             return_dict=False,
-        #         )[0]               
-        #         # # predict the noise residual
-        #         # pred = self.unet(
-        #         #     latent_model_input, 
-        #         #     t, 
-        #         #     encoder_hidden_states=text_embeddings[:b],
-        #         #     down_block_additional_residuals=down_block_res_samples,
-        #         #     mid_block_additional_residual=mid_block_res_sample,
-        #         #     return_dict=False,
-        #         # )[0]
-                
-        #         reference_control_reader.clear()
-                
-        #         pred_uc, pred_c = pred.chunk(2)
-        #         pred = torch.cat([pred_uc.unsqueeze(0), pred_c.unsqueeze(0)])
-        #         for j, c in enumerate(context):
-        #             noise_pred[:, :, c] = noise_pred[:, :, c] + pred[:, j]
-        #             counter[:, :, c] = counter[:, :, c] + 1
-                    
-        #     if is_dist_initialized:
-        #         noise_pred_gathered = [torch.zeros_like(noise_pred) for _ in range(world_size)]
-        #         if rank == 0:
-        #             dist.gather(tensor=noise_pred, gather_list=noise_pred_gathered, dst=0)
-        #         else:
-        #             dist.gather(tensor=noise_pred, gather_list=[], dst=0)
-        #         dist.barrier()
-
-        #         if rank == 0:
-        #             for k in range(1, world_size):
-        #                 for context in global_context[k::world_size]:
-        #                     for j, c in enumerate(context):
-        #                         noise_pred[:, :, c] = noise_pred[:, :, c] + noise_pred_gathered[k][:, :, c] 
-        #                         counter[:, :, c] = counter[:, :, c] + 1
-
-        #     # perform guidance
-        #     if do_classifier_free_guidance:
-        #         noise_pred_uncond, noise_pred_text = (noise_pred / counter).chunk(2)
-        #         noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
-
-        #     # compute the previous noisy sample x_t -> x_t-1
-        #     latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
-            
-        #     if is_dist_initialized:
-        #         dist.broadcast(latents, 0)
-        #         dist.barrier()
-            
-        #     reference_control_writer.clear()
 
         # interpolation_factor = 1
         # latents = self.interpolate_latents(latents, interpolation_factor, device)
