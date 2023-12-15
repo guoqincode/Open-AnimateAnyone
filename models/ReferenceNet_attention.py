@@ -56,7 +56,8 @@ class ReferenceNetAttention():
             gn_auto_machine_weight,
             style_fidelity,
             reference_attn,
-            dtype=torch.float16,
+            # dtype=torch.float16,
+            dtype=torch.float32,
             batch_size=1, 
             num_images_per_prompt=1, 
             device=torch.device("cpu"), 
@@ -127,7 +128,12 @@ class ReferenceNetAttention():
                     if not is_image:
                         self.bank = [rearrange(d.unsqueeze(1).repeat(1, video_length, 1, 1), "b t l c -> (b t) l c")[:hidden_states.shape[0]] for d in self.bank]
                     # modify Reference Sec 3.2.2
+                    # print(f"#### norm_hidden_states #### {norm_hidden_states.size()}")
+                    # print(f"#### self.bank #### {self.bank[0].size()}")
                     modify_norm_hidden_states = torch.cat([norm_hidden_states] + self.bank, dim=1)
+                    # print("########## modify_norm_hidden_states ",modify_norm_hidden_states.dtype,"  ##########") # torch.float32
+                    # print("########## self.bank[0] ",self.bank[0].dtype,"  ##########") # torch.float16 -> torch.float32
+                    # print(f"#### modify_norm_hidden_states #### {modify_norm_hidden_states.size()}")
                     hidden_states_uc = self.attn1(modify_norm_hidden_states, 
                                                 encoder_hidden_states=modify_norm_hidden_states,
                                                 attention_mask=attention_mask)[:,:hidden_states.shape[-2],:] + hidden_states
@@ -226,7 +232,8 @@ class ReferenceNetAttention():
                 module.bank = []
                 module.attn_weight = float(i) / float(len(attn_modules))
     
-    def update(self, writer, dtype=torch.float16):
+    # def update(self, writer, dtype=torch.float16):
+    def update(self, writer, dtype=torch.float32):
         if self.reference_attn:
             if self.fusion_blocks == "midup":
                 reader_attn_modules = [module for module in (torch_dfs(self.unet.mid_block)+torch_dfs(self.unet.up_blocks)) if isinstance(module, _BasicTransformerBlock)]
@@ -239,6 +246,12 @@ class ReferenceNetAttention():
             
             # print('reader_attn_modules:',reader_attn_modules)
             # print('writer_attn_modules:',writer_attn_modules)
+            if len(reader_attn_modules) == 0:
+                print('reader_attn_modules is null')
+                assert False
+            if len(writer_attn_modules) == 0:
+                print('writer_attn_modules is null')
+                assert False
               
             for r, w in zip(reader_attn_modules, writer_attn_modules):
                 r.bank = [v.clone().to(dtype) for v in w.bank]
