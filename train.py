@@ -26,7 +26,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 import diffusers
 from diffusers import AutoencoderKL, DDIMScheduler
 from diffusers.models import UNet2DConditionModel
-from diffusers.pipelines import StableDiffusionPipeline
+# from diffusers.pipelines import StableDiffusionPipeline
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version
 from diffusers.utils.import_utils import is_xformers_available
@@ -43,6 +43,8 @@ from models.ReferenceEncoder import ReferenceEncoder
 from models.PoseGuider import PoseGuider
 from models.ReferenceNet import ReferenceNet
 from models.ReferenceNet_attention import ReferenceNetAttention
+
+import pdb
 
 def init_dist(launcher="slurm", backend='nccl', port=29500, **kwargs):
     """Initializes distributed environment."""
@@ -75,6 +77,23 @@ def init_dist(launcher="slurm", backend='nccl', port=29500, **kwargs):
     
     return local_rank
 
+
+def get_parameters_without_gradients(model):
+    """
+    Returns a list of names of the model parameters that have no gradients.
+
+    Args:
+    model (torch.nn.Module): The model to check.
+    
+    Returns:
+    List[str]: A list of parameter names without gradients.
+    """
+    no_grad_params = []
+    for name, param in model.named_parameters():
+        print(f"{name} : {param.grad}")
+        if param.grad is None:
+            no_grad_params.append(name)
+    return no_grad_params
 
 
 def main(
@@ -188,7 +207,7 @@ def main(
         poseguider_state_dict = torch.load(poseguider_checkpoint_path, map_location="cpu")
         referencenet_state_dict = torch.load(referencenet_checkpoint_path, map_location="cpu")
         poseguider.load_state_dict(poseguider_state_dict, strict=False)
-        referencenet.load_state_dict(state_dict, strict=False)
+        referencenet.load_state_dict(referencenet_state_dict, strict=False)
 
     
 
@@ -222,10 +241,11 @@ def main(
     
     # Set unet trainable parameters
     unet.requires_grad_(False)
+    # unet.requires_grad_(True)
     for name, param in unet.named_parameters():
         for trainable_module_name in trainable_modules:
             if trainable_module_name in name:
-                print(trainable_module_name)
+                # print(trainable_module_name)
                 param.requires_grad = True
                 break
     
@@ -234,16 +254,16 @@ def main(
         referencenet.requires_grad_(True)
     else:
         poseguider.requires_grad_(False)
-        referencenet.requires_grad_(False)
-            
-    # 设置 poseguider 和 referencenet的所有参数都是可训练的
-    
+        referencenet.requires_grad_(False)    
                    
-    trainable_params = list(filter(lambda p: p.requires_grad, unet.parameters()))
     
+    trainable_params = list(filter(lambda p: p.requires_grad, unet.parameters()))
     if image_finetune:
         trainable_params += list(filter(lambda p: p.requires_grad, poseguider.parameters())) + \
                    list(filter(lambda p: p.requires_grad, referencenet.parameters()))
+    
+    # print(len(trainable_params))
+    # exit(0)
     
     optimizer = torch.optim.AdamW(
         trainable_params,
@@ -279,7 +299,7 @@ def main(
 
     # Get the training dataset
     # train_dataset = WebVid10M(**train_data, is_image=image_finetune)
-    train_dataset = TikTok(**train_data, is_image=image_finetune)
+    # train_dataset = TikTok(**train_data, is_image=image_finetune)
     train_dataset = UBC_Fashion(**train_data, is_image=image_finetune)
     
     distributed_sampler = DistributedSampler(
@@ -367,8 +387,12 @@ def main(
     for epoch in range(first_epoch, num_train_epochs):
         train_dataloader.sampler.set_epoch(epoch)
         unet.train()
+        poseguider.train()
+        referencenet.train()
+        
         
         for step, batch in enumerate(train_dataloader):
+            # ToDo: add cfg_random_null_image to strength cfg
             # if cfg_random_null_text:
             #     batch['text'] = [name if random.random() > cfg_random_null_text_ratio else "" for name in batch['text']]
                 
@@ -418,7 +442,6 @@ def main(
             timesteps = timesteps.long()
             
             # Add noise to the latents according to the noise magnitude at each timestep
-            # (this is the forward diffusion process)
             noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
             
             
@@ -450,14 +473,17 @@ def main(
             # Predict the noise residual and compute loss
             # Mixed-precision training
             with torch.cuda.amp.autocast(enabled=mixed_precision_training):
-                referencenet(latents_ref_img, timesteps, encoder_hidden_states)
+                ref_timesteps = torch.zeros_like(timesteps)
+                
+                pdb.set_trace()
+                
+                referencenet(latents_ref_img, ref_timesteps, encoder_hidden_states)
                 reference_control_reader.update(reference_control_writer)
                 
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                 loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
                 
                 
-
             optimizer.zero_grad()
 
             # Backpropagate
@@ -465,14 +491,26 @@ def main(
                 scaler.scale(loss).backward()
                 """ >>> gradient clipping >>> """
                 scaler.unscale_(optimizer)
-                torch.nn.utils.clip_grad_norm_(unet.parameters(), max_grad_norm)
+                # torch.nn.utils.clip_grad_norm_(unet.parameters(), max_grad_norm)
+                torch.nn.utils.clip_grad_norm_(trainable_params, max_grad_norm)
                 """ <<< gradient clipping <<< """
                 scaler.step(optimizer)
                 scaler.update()
             else:
                 loss.backward()
+                
+                # pdb.set_trace()
+                
+                # no_grad_params_poseguider = get_parameters_without_gradients(poseguider)
+                # no_grad_params_referencenet = get_parameters_without_gradients(referencenet)
+                # if len(no_grad_params_poseguider) != 0:
+                #     print("PoseGuider no grad params:", no_grad_params_poseguider)
+                # if len(no_grad_params_referencenet) != 0:
+                #     print("ReferenceNet no grad params:", no_grad_params_referencenet)
+                
                 """ >>> gradient clipping >>> """
-                torch.nn.utils.clip_grad_norm_(unet.parameters(), max_grad_norm)
+                # torch.nn.utils.clip_grad_norm_(unet.parameters(), max_grad_norm)
+                torch.nn.utils.clip_grad_norm_(trainable_params, max_grad_norm)
                 """ <<< gradient clipping <<< """
                 optimizer.step()
 
@@ -496,6 +534,7 @@ def main(
                 state_dict = {
                     "epoch": epoch,
                     "global_step": global_step,
+                    "unet_state_dict": unet.state_dict(),
                     "poseguider_state_dict": poseguider.state_dict(),
                     "referencenet_state_dict": referencenet.state_dict(),
                     
@@ -503,7 +542,7 @@ def main(
                 if step == len(train_dataloader) - 1:
                     torch.save(state_dict, os.path.join(save_path, f"checkpoint-epoch-{epoch+1}.ckpt"))
                 else:
-                    torch.save(state_dict, os.path.join(save_path, f"checkpoint.ckpt"))
+                    torch.save(state_dict, os.path.join(save_path, f"checkpoint-global_step-{global_step}.ckpt"))
                 logging.info(f"Saved state to {save_path} (global_step: {global_step})")
                 
             # # Periodically validation
