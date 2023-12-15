@@ -157,7 +157,7 @@ class ReferenceNetAttention():
                         ) + hidden_states[_uc_mask]
                     hidden_states = hidden_states_c.clone()
                         
-                    self.bank.clear()
+                    # self.bank.clear()
                     if self.attn2 is not None:
                         # Cross-Attention
                         norm_hidden_states = (
