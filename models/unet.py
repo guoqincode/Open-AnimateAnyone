@@ -446,7 +446,8 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
         return UNet3DConditionOutput(sample=sample)
 
     @classmethod
-    def from_pretrained_2d(cls, pretrained_model_path, subfolder=None, unet_additional_kwargs=None):
+    def from_pretrained_2d(cls, pretrained_model_path, subfolder=None, unet_additional_kwargs=None, specific_model=None,):
+        # load merged sd's unet 1.5 + motion_module_v1 state_dict()
         if subfolder is not None:
             pretrained_model_path = os.path.join(pretrained_model_path, subfolder)
         print(f"loaded temporal unet's pretrained weights from {pretrained_model_path}")
@@ -472,16 +473,23 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
 
         from diffusers.utils import WEIGHTS_NAME
         model = cls.from_config(config, **unet_additional_kwargs)
-        model_file = os.path.join(pretrained_model_path, WEIGHTS_NAME)
+        if not specific_model:
+            model_file = os.path.join(pretrained_model_path, WEIGHTS_NAME)
+        else:
+            model_file = os.path.join(pretrained_model_path,specific_model)
         if not os.path.isfile(model_file):
             raise RuntimeError(f"{model_file} does not exist")
+        
         state_dict = torch.load(model_file, map_location="cpu")
 
         m, u = model.load_state_dict(state_dict, strict=False)
-        print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)};")
-        print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n")
+        print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)} ###")
+        if len(m) ==0 or len(u) ==0:
+            print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n ###")
         
         params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
-        print(f"### Temporal Module Parameters: {sum(params) / 1e6} M")
+        print(f"### Temporal Module Parameters: {sum(params) / 1e6} M ###")
+        params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
+        print(f"### Temporal Module Parameters: {sum(params) / 1e6} M ###")
         
         return model
