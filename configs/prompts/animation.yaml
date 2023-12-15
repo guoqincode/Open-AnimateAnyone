@@ -3,7 +3,9 @@ pretrained_vae_path: "../magic-animate/pretrained_models/sd-vae-ft-mse"
 pretrained_controlnet_path: "../magic-animate/pretrained_models/MagicAnimate/densepose_controlnet"
 pretrained_appearance_encoder_path: "../magic-animate/pretrained_models/MagicAnimate/appearance_encoder"
 pretrained_unet_path: ""
-pretrained_clip_path: "../magic-animate/pretrained_models/clip-vit-base-patch32"
+# pretrained_clip_path: "../magic-animate/pretrained_models/clip-vit-base-patch32"
+pretrained_clip_path: "../magic-animate/pretrained_models/clip-vit-large-patch14"
+
 
 motion_module: "../magic-animate/pretrained_models/MagicAnimate/temporal_attention/temporal_attention.ckpt"
 
