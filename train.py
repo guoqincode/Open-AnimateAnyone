@@ -46,7 +46,7 @@ from models.ReferenceNet_attention import ReferenceNetAttention
 
 import pdb
 
-def init_dist(launcher="slurm", backend='nccl', port=29500, **kwargs):
+def init_dist(launcher="slurm", backend='nccl', port=28888, **kwargs):
     """Initializes distributed environment."""
     if launcher == 'pytorch':
         rank = int(os.environ['RANK'])
@@ -155,7 +155,7 @@ def main(
     check_min_version("0.21.4")
 
     # Initialize distributed training
-    local_rank      = init_dist(launcher=launcher)
+    local_rank      = init_dist(launcher=launcher, port=28888)
     global_rank     = dist.get_rank()
     num_processes   = dist.get_world_size()
     # num_processes   = 0
@@ -356,7 +356,10 @@ def main(
 
     # DDP warpper
     unet.to(local_rank)
-    # unet = DDP(unet, device_ids=[local_rank], output_device=local_rank)
+
+    unet = DDP(unet, device_ids=[local_rank], output_device=local_rank)
+    poseguider = DDP(poseguider, device_ids=[local_rank], output_device=local_rank)
+    referencenet = DDP(referencenet, device_ids=[local_rank], output_device=local_rank)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / gradient_accumulation_steps)
@@ -475,7 +478,7 @@ def main(
             with torch.cuda.amp.autocast(enabled=mixed_precision_training):
                 ref_timesteps = torch.zeros_like(timesteps)
                 
-                pdb.set_trace()
+                # pdb.set_trace()
                 
                 referencenet(latents_ref_img, ref_timesteps, encoder_hidden_states)
                 reference_control_reader.update(reference_control_writer)
@@ -616,5 +619,9 @@ if __name__ == "__main__":
 
     main(name=name, launcher=args.launcher, use_wandb=args.wandb, **config)
     
-    # torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_1.yaml
-    # torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_2.yaml
+
+    # CUDA_VISIBLE_DEVICES=1 torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_1_oneshot.yaml
+    # CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes=1 --nproc_per_node=2 --master_port 28888 train.py --config configs/training/train_stage_1.yaml
+    # CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 torchrun --nnodes=1 --nproc_per_node=6 --master_port 28889 train.py --config configs/training/train_stage_1.yaml
+
+    # CUDA_VISIBLE_DEVICES=7 torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_2.yaml
