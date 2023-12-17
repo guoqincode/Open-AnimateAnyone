@@ -14,6 +14,8 @@ pip install decord==0.6.0
 pip install wandb==0.16.1
 pip install accelerate==0.22.0
 pip install imageio==2.9.0
+pip install av==11.0.0
+pip install imageio-ffmpeg
 
 cd pretrained_models
 git lfs install
