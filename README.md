@@ -15,8 +15,9 @@ This project is under continuous development in part-time, there may be bugs in 
 Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/main).
 
 or you can:
-
+```bash
 bash fast_env.sh
+```
 
 ## ToDo
 - [x] **Release Training Code.**
