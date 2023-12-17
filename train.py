@@ -356,10 +356,11 @@ def main(
 
     # DDP warpper
     unet.to(local_rank)
-
     unet = DDP(unet, device_ids=[local_rank], output_device=local_rank)
-    poseguider = DDP(poseguider, device_ids=[local_rank], output_device=local_rank)
-    referencenet = DDP(referencenet, device_ids=[local_rank], output_device=local_rank)
+    
+    if image_finetune:
+        poseguider = DDP(poseguider, device_ids=[local_rank], output_device=local_rank)
+        referencenet = DDP(referencenet, device_ids=[local_rank], output_device=local_rank)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / gradient_accumulation_steps)
