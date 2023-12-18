@@ -134,7 +134,7 @@ def main(
     lr_scheduler: str = "constant",
 
     trainable_modules: Tuple[str] = (None, ),
-    num_workers: int = 0,
+    num_workers: int = 8,
     train_batch_size: int = 1,
     adam_beta1: float = 0.9,
     adam_beta2: float = 0.999,
@@ -420,6 +420,7 @@ def main(
             pixel_values_pose = batch["pixel_values_pose"].to(local_rank)
             clip_ref_image = batch["clip_ref_image"].to(local_rank)
             pixel_values_ref_img = batch["pixel_values_ref_img"].to(local_rank)
+            drop_image_embeds = batch["drop_image_embeds"].to(local_rank) # torch.Size([bs])
             video_length = pixel_values.shape[1]
             
             with torch.no_grad():
@@ -464,8 +465,15 @@ def main(
                 #     batch['text'], max_length=tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt"
                 # ).input_ids.to(latents.device)
                 # encoder_hidden_states = text_encoder(prompt_ids)[0]
-                encoder_hidden_states = clip_image_encoder(clip_ref_image).unsqueeze(1)
-                
+                encoder_hidden_states = clip_image_encoder(clip_ref_image).unsqueeze(1) # [bs,1,768]
+            
+            # support cfg train
+            mask = drop_image_embeds > 0
+            mask = mask.unsqueeze(1).unsqueeze(2).expand_as(encoder_hidden_states)
+            encoder_hidden_states[mask] = 0
+
+            # pdb.set_trace()
+            
             # Get the target for loss depending on the prediction type
             if noise_scheduler.config.prediction_type == "epsilon":
                 target = noise
@@ -538,9 +546,9 @@ def main(
                 state_dict = {
                     "epoch": epoch,
                     "global_step": global_step,
-                    "unet_state_dict": unet.state_dict(),
-                    "poseguider_state_dict": poseguider.state_dict(),
-                    "referencenet_state_dict": referencenet.state_dict(),
+                    "unet_state_dict": unet.module.state_dict(),
+                    "poseguider_state_dict": poseguider.module.state_dict(),
+                    "referencenet_state_dict": referencenet.module.state_dict(),
                     
                 }
                 if step == len(train_dataloader) - 1:
@@ -624,5 +632,6 @@ if __name__ == "__main__":
     # CUDA_VISIBLE_DEVICES=1 torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_1_oneshot.yaml
     # CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes=1 --nproc_per_node=2 --master_port 28888 train.py --config configs/training/train_stage_1.yaml
     # CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 torchrun --nnodes=1 --nproc_per_node=6 --master_port 28889 train.py --config configs/training/train_stage_1.yaml
+    # CUDA_VISIBLE_DEVICES=4,5,6,7 torchrun --nnodes=1 --nproc_per_node=4 --master_port 28887 train.py --config configs/training/train_stage_1.yaml
 
     # CUDA_VISIBLE_DEVICES=7 torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_2.yaml
