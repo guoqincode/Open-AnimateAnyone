@@ -11,23 +11,31 @@ class PoseGuider(nn.Module):
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3, padding=1),
+            nn.BatchNorm2d(3),
             nn.ReLU(),
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(16),
             nn.ReLU(),
 
             nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
             nn.ReLU(),
 
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
 
             nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
             nn.ReLU()
         )
 
@@ -36,6 +44,8 @@ class PoseGuider(nn.Module):
 
         # Initialize layers
         self._initialize_weights()
+
+        self.scale = nn.Parameter(torch.ones(1))
 
     # def _initialize_weights(self):
     #     # Initialize weights with Gaussian distribution and zero out the final layer
@@ -68,7 +78,7 @@ class PoseGuider(nn.Module):
         x = self.conv_layers(x)
         x = self.final_proj(x)
 
-        return x
+        return x * self.scale
 
     @classmethod
     def from_pretrained(cls,pretrained_model_path):
