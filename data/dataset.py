@@ -7,8 +7,6 @@ from PIL import Image
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data.dataset import Dataset
-# from utils.util import zero_rank_print
-# from utils.util import zero_rank_print
 from transformers import CLIPProcessor
 
 # adapt from https://github.com/guoyww/AnimateDiff/blob/main/animatediff/data/dataset.py
@@ -115,12 +113,14 @@ class TikTok(Dataset):
         pixel_values_ref_img = pixel_values_ref_img.squeeze(0)
         
         # clip_ref_image = clip_ref_image.unsqueeze(1) # [bs,1,768]
+        drop_image_embeds = 1 if random.random() < 0.1 else 0
 
         sample = dict(
             pixel_values=pixel_values, 
             pixel_values_pose=pixel_values_pose,
             clip_ref_image=clip_ref_image,
-            pixel_values_ref_img=pixel_values_ref_img
+            pixel_values_ref_img=pixel_values_ref_img,
+            drop_image_embeds=drop_image_embeds,
             )
         
         return sample
@@ -226,12 +226,13 @@ class UBC_Fashion(Dataset):
         pixel_values_ref_img = pixel_values_ref_img.squeeze(0)
         
         # clip_ref_image = clip_ref_image.unsqueeze(1) # [bs,1,768]
-
+        drop_image_embeds = 1 if random.random() < 0.1 else 0
         sample = dict(
             pixel_values=pixel_values, 
             pixel_values_pose=pixel_values_pose,
             clip_ref_image=clip_ref_image,
-            pixel_values_ref_img=pixel_values_ref_img
+            pixel_values_ref_img=pixel_values_ref_img,
+            drop_image_embeds=drop_image_embeds,
             )
         
         return sample
@@ -251,28 +252,28 @@ def collate_fn(data):
     pixel_values_pose = torch.stack([example["pixel_values_pose"] for example in data])
     clip_ref_image = torch.cat([example["clip_ref_image"] for example in data])
     pixel_values_ref_img = torch.stack([example["pixel_values_ref_img"] for example in data])
-    
+    drop_image_embeds = [example["drop_image_embeds"] for example in data]
+    drop_image_embeds = torch.Tensor(drop_image_embeds)
     
     return {
         "pixel_values": pixel_values,
         "pixel_values_pose": pixel_values_pose,
         "clip_ref_image": clip_ref_image,
-        "pixel_values_ref_img": pixel_values_ref_img
+        "pixel_values_ref_img": pixel_values_ref_img,
+        "drop_image_embeds": drop_image_embeds,
     }
-
-
 
 
 if __name__ == "__main__":
     # from animatediff.utils.util import save_videos_grid
 
     dataset = TikTok(
-        csv_path="/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv",
-        video_folder="/mnt/f/research/HumanVideo/TikTok_dataset",
+        csv_path="./data/TikTok_info.csv",
+        video_folder="./TikTok_dataset",
         sample_size=256,
         sample_stride=4, sample_n_frames=16,
-        is_image=False,
-        clip_model_path = "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+        is_image=True,
+        clip_model_path = "./pretrained_models/clip-vit-base-patch32"
     )    
     
     dataloader = torch.utils.data.DataLoader(dataset, collate_fn=collate_fn,batch_size=4, num_workers=0,)
@@ -285,6 +286,10 @@ if __name__ == "__main__":
         print(batch["pixel_values_pose"].size())
         print(batch["clip_ref_image"].size())
         print(batch["pixel_values_ref_img"].size())
+        print(batch["drop_image_embeds"].size()) # torch.Size([4])
+        break
+
+    # python3 -m data.dataset
         
 
 
