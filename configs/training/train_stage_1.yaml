@@ -1,9 +1,9 @@
 image_finetune: true
 
 output_dir: "outputs"
-pretrained_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/stable-diffusion-v1-5"
-# clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
-clip_model_path: "../magic-animate/pretrained_models/clip-vit-large-patch14"
+pretrained_model_path: "./pretrained_models/stable-diffusion-v1-5"
+clip_model_path: "./pretrained_models/clip-vit-base-patch32"
+# clip_model_path: "./pretrained_models/clip-vit-large-patch14"
 poseguider_checkpoint_path: ""
 referencenet_checkpoint_path: ""
 
@@ -11,27 +11,39 @@ noise_scheduler_kwargs:
   num_train_timesteps: 1000
   beta_start:          0.00085
   beta_end:            0.012
-  beta_schedule:       "scaled_linear"
+  # beta_schedule:       "scaled_linear"
+  beta_schedule:       "linear"
   steps_offset:        1
   clip_sample:         false
 
-description: "### Train info: train stage 1: image pretrain ###"
+description: "### Train Info: train stage 1: image pretrain ###"
+
+unet_additional_kwargs:
+  use_motion_module              : true
+  motion_module_resolutions      : [ 1,2,4,8 ]
+  unet_use_cross_frame_attention : false
+  unet_use_temporal_attention    : false
+
+  motion_module_type: Vanilla
+  motion_module_kwargs:
+    num_attention_heads                : 8
+    num_transformer_block              : 1
+    attention_block_types              : [ "Temporal_Self", "Temporal_Self" ]
+    temporal_position_encoding         : true
+    temporal_position_encoding_max_len : 24
+    temporal_attention_dim_div         : 1
+    zero_initialize                    : true
+
 
 train_data:
-  csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/UBC_train_info_test.csv"
-  video_folder: "/mnt/f/research/HumanVideo/UBC_dataset"
-  sample_size:  256
+  # csv_path:     "./data/UBC_train_info_test.csv"
+  csv_path:     "./data/UBC_train_info.csv"
+  video_folder: "./UBC_dataset"
+  sample_size:  512 # for 40G 256
   sample_stride: 4
   sample_n_frames: 16
-  clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
+  clip_model_path: "./pretrained_models/clip-vit-base-patch32"
 
-# train_data:
-#   csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv"
-#   video_folder: "/mnt/f/research/HumanVideo/TikTok_dataset"
-#   sample_size:  256
-#   sample_stride: 4
-#   sample_n_frames: 16
-#   clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
 
 validation_data:
   prompts:
@@ -51,20 +63,23 @@ unet_checkpoint_path: ""
 fusion_blocks: "full"
 
 learning_rate:    1.e-5
-train_batch_size: 1
+train_batch_size: 4
 
 max_train_epoch:      -1
-max_train_steps:      30000
+max_train_steps:      60000
 checkpointing_epochs: -1
-checkpointing_steps:  10000
-gradient_accumulation_steps: 16
+checkpointing_steps:  5000
+gradient_accumulation_steps: 1
 
 
-validation_steps:       5000
+validation_steps:       500000
 validation_steps_tuple: [2, 50]
 
 global_seed: 42
-mixed_precision_training: true
-enable_xformers_memory_efficient_attention: True
+# mixed_precision_training: true
+mixed_precision_training: False
+# enable_xformers_memory_efficient_attention: True
+enable_xformers_memory_efficient_attention: False
+
 
 is_debug: False
