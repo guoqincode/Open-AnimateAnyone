@@ -11,7 +11,7 @@ Training may be slow due to GPU shortage.😢
 ## Note !!!
 This project is under continuous development in part-time, there may be bugs in the code, welcome to correct them, I will optimize the code after the pre-trained model is released!
 
-In the current version, we recommend training on 8 or 16 A100 (80G) at 512 or 768 resolution. **Low resolution (256,384) does not give good results!!!(VAE is very poor at reconstruction at low resolution.)**
+In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 or 768 resolution. **Low resolution (256,384) does not give good results!!!(VAE is very poor at reconstruction at low resolution.)**
 
 ## Requirements
 Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/main).
