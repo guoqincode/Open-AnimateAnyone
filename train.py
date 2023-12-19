@@ -546,9 +546,9 @@ def main(
                 state_dict = {
                     "epoch": epoch,
                     "global_step": global_step,
-                    "unet_state_dict": unet.module.state_dict(),
-                    "poseguider_state_dict": poseguider.module.state_dict(),
-                    "referencenet_state_dict": referencenet.module.state_dict(),
+                    "unet_state_dict": unet.state_dict(),
+                    "poseguider_state_dict": poseguider.state_dict(),
+                    "referencenet_state_dict": referencenet.state_dict(),
                     
                 }
                 if step == len(train_dataloader) - 1:
