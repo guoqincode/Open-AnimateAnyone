@@ -8,6 +8,8 @@ The first training phase basic test passed, currently in training and testing th
 
 Training may be slow due to GPU shortage.😢
 
+It only takes a few days to release the weights.😄
+
 ## Note !!!
 This project is under continuous development in part-time, there may be bugs in the code, welcome to correct them, I will optimize the code after the pre-trained model is released!
 
