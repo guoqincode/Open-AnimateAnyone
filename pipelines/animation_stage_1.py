@@ -71,18 +71,23 @@ def main(args):
     # text_encoder = CLIPTextModel.from_pretrained(config.pretrained_clip_path, subfolder="text_encoder")
     text_encoder = CLIPTextModel.from_pretrained(config.pretrained_clip_path)
     
-    unet = UNet2DConditionModel.from_pretrained(config.pretrained_model_path, subfolder="unet")
+    if config.pretrained_unet_path is not None:
+        unet_config = UNet2DConditionModel.load_config(config.pretrained_model_path, subfolder="unet")
+        unet = UNet2DConditionModel.from_config(unet_config)
+        unet_state_dict = torch.load(config.pretrained_unet_path, map_location="cpu")
+        unet.load_state_dict(unet_state_dict, strict=False)
+    else:
+        unet = UNet2DConditionModel.from_pretrained(config.pretrained_model_path, subfolder="unet")
+
     vae = AutoencoderKL.from_pretrained(config.pretrained_model_path, subfolder="vae")
     
-    print(config.pretrained_poseguider_path) # /mnt/f/research/HumanVideo/AnimateAnyone-unofficial/poseguider_test_v0.ckpt
     poseguider = PoseGuider.from_pretrained(pretrained_model_path=config.pretrained_poseguider_path)
+    poseguider.eval()
     clip_image_encoder = ReferenceEncoder(model_path=config.pretrained_clip_path)
     clip_image_processor = CLIPProcessor.from_pretrained(config.pretrained_clip_path,local_files_only=True)
     
     referencenet = ReferenceNet.load_referencenet(pretrained_model_path=config.pretrained_referencenet_path)
     
-    # reference_control_writer = ReferenceNetAttention(referencenet, do_classifier_free_guidance=True, mode='write', fusion_blocks=config.fusion_blocks)
-    # reference_control_reader = ReferenceNetAttention(unet, do_classifier_free_guidance=True, mode='read', fusion_blocks=config.fusion_blocks)
     reference_control_writer = None
     reference_control_reader = None
     
@@ -299,3 +304,4 @@ if __name__ == "__main__":
     run(args)
     
     # python3 -m pipelines.animation_stage_1 --config configs/prompts/animation_stage_1.yaml
+    # CUDA_VISIBLE_DEVICES=3 python3 -m pipelines.animation_stage_1 --config configs/prompts/animation_stage_1.yaml
