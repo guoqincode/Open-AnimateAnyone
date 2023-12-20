@@ -15,6 +15,13 @@ This project is under continuous development in part-time, there may be bugs in 
 
 In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 or 768 resolution. **Low resolution (256,384) does not give good results!!!(VAE is very poor at reconstruction at low resolution.)**
 
+## ToDo
+- [x] **Release Training Code.**
+- [x] **Release Inference Code.** 
+- [ ] **Release Unofficial Pre-trained Weights. <font color="red">(Note:Train on public datasets instead of large-scale private datasets, just for academic research.🤗)</font>**
+- [ ] DeepSpeed + Accelerator Training.
+
+
 ## Requirements
 Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/main).
 
@@ -22,13 +29,6 @@ or you can:
 ```bash
 bash fast_env.sh
 ```
-
-## ToDo
-- [x] **Release Training Code.**
-- [x] **Release Inference Code.** 
-- [ ] **Release Unofficial Pre-trained Weights. <font color="red">(Note:Train on public datasets instead of large-scale private datasets, just for academic research.🤗)</font>**
-- [ ] DeepSpeed + Accelerator Training.
-
 
 ## Training
 
