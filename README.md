@@ -31,13 +31,13 @@ bash fast_env.sh
 #### First Stage
 
 ```python
-torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_1.yaml
+torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_stage_1.yaml
 ```
 
 #### Second Stage
 
 ```python
-torchrun --nnodes=1 --nproc_per_node=1 train.py --config configs/training/train_stage_2.yaml
+torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_stage_2.yaml
 ```
 
 ## Inference
