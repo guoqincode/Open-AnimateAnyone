@@ -26,7 +26,7 @@ bash fast_env.sh
 ## ToDo
 - [x] **Release Training Code.**
 - [x] **Release Inference Code.** 
-- [ ] **Release Unofficial Pre-trained Weights. (Note:Train on public datasets instead of large-scale private datasets, just for academic research.🤗)**
+- [ ] **Release Unofficial Pre-trained Weights. <font color="red">(Note:Train on public datasets instead of large-scale private datasets, just for academic research.🤗)</font>**
 - [ ] DeepSpeed + Accelerator Training.
 
 
