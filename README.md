@@ -3,6 +3,8 @@
 ## Overview
 This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff).
 
+If you find this repository helpful, please consider giving us a star⭐! 
+
 ## News 🤗🤗🤗
 The first training phase basic test passed, currently in training and testing the second phase.
 
