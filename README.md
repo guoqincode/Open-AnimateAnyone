@@ -6,7 +6,7 @@ This repository contains an simple and unofficial implementation of [Animate Any
 ## News 🤗🤗🤗
 The first training phase basic test passed, currently in training and testing the second phase.
 
-Training may be slow due to GPU shortage.😢
+~~Training may be slow due to GPU shortage.😢~~
 
 It only takes a few days to release the weights.😄
 
