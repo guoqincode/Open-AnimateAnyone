@@ -19,6 +19,7 @@ In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 
 - [x] **Release Training Code.**
 - [x] **Release Inference Code.** 
 - [ ] **Release Unofficial Pre-trained Weights. <font color="red">(Note:Train on public datasets instead of large-scale private datasets, just for academic research.🤗)</font>**
+- [ ] **gradio.**
 - [ ] DeepSpeed + Accelerator Training.
 
 
