@@ -66,3 +66,5 @@ Special thanks to the original authors of the [Animate Anyone](https://humanaigc
 
 ## Email
 guoqin@stu.pku.edu.cn
+
+My response may be slow, please don't ask me nonsense questions.
