@@ -12,6 +12,17 @@ The first training phase basic test passed, currently in training and testing th
 
 It only takes a few days to release the weights.😄
 
+## Sample of Stage 1 Result on UBC-fashion dataset
+<table class="center">
+    <tr><td><img src="./assets/stage1/1.png"></td><td><img src="./assets/stage1/2.png"></td></tr>
+    <tr><td><img src="./assets/stage1/3.png"></td><td><img src="./assets/stage1/8.png"></td></tr>
+    <tr><td><img src="./assets/stage1/9.png"></td><td><img src="./assets/stage1/10.png"></td></tr>
+    <tr><td><img src="./assets/stage1/4.png"></td><td><img src="./assets/stage1/5.png"></td></tr>
+    <tr><td><img src="./assets/stage1/6.png"></td><td><img src="./assets/stage1/7.png"></td></tr>
+
+</table>
+<p style="margin-left: 2em; margin-top: -1em"></p>
+
 ## Note !!!
 This project is under continuous development in part-time, there may be bugs in the code, welcome to correct them, I will optimize the code after the pre-trained model is released!
 
