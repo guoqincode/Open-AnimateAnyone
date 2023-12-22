@@ -13,6 +13,9 @@ The first training phase basic test passed, currently in training and testing th
 It only takes a few days to release the weights.😄
 
 ## Sample of Stage 1 Result on UBC-fashion dataset
+
+The current version of the face also has some artifacts.
+
 <table class="center">
     <tr><td><img src="./assets/stage1/1.png"></td><td><img src="./assets/stage1/2.png"></td></tr>
     <tr><td><img src="./assets/stage1/3.png"></td><td><img src="./assets/stage1/8.png"></td></tr>
