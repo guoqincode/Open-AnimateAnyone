@@ -14,7 +14,7 @@ It only takes a few days to release the weights.😄
 
 ## Sample of Stage 1 Result on UBC-fashion dataset
 
-The current version of the face also has some artifacts.
+The current version of the face also has some artifacts.  Also, this is a model trained on a UBC dataset rather than a large-scale dataset.
 
 <table class="center">
     <tr><td><img src="./assets/stage1/1.png"></td><td><img src="./assets/stage1/2.png"></td></tr>
