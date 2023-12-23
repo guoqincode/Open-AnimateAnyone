@@ -128,19 +128,13 @@ class ReferenceNetAttention():
                     if not is_image:
                         self.bank = [rearrange(d.unsqueeze(1).repeat(1, video_length, 1, 1), "b t l c -> (b t) l c")[:hidden_states.shape[0]] for d in self.bank]
                     # modify Reference Sec 3.2.2
-                    # print(f"#### norm_hidden_states #### {norm_hidden_states.size()}")
-                    # print(f"#### self.bank #### {self.bank[0].size()}")
                     modify_norm_hidden_states = torch.cat([norm_hidden_states] + self.bank, dim=1)
-                    # print("########## modify_norm_hidden_states ",modify_norm_hidden_states.dtype,"  ##########") # torch.float16
-                    # print("########## self.bank[0] ",self.bank[0].dtype,"  ##########") # torch.float16 -> torch.float16
-                    # print(f"#### modify_norm_hidden_states #### {modify_norm_hidden_states.size()}")
+
                     hidden_states_uc = self.attn1(modify_norm_hidden_states, 
                                                 encoder_hidden_states=modify_norm_hidden_states,
                                                 attention_mask=attention_mask)[:,:hidden_states.shape[-2],:] + hidden_states
                     
-                    # hidden_states_uc = self.attn1(norm_hidden_states, 
-                    #                             encoder_hidden_states=torch.cat([norm_hidden_states] + self.bank, dim=1),
-                    #                             attention_mask=attention_mask) + hidden_states
+
                     hidden_states_c = hidden_states_uc.clone()
                     _uc_mask = uc_mask.clone()
                     if do_classifier_free_guidance:
@@ -246,8 +240,6 @@ class ReferenceNetAttention():
             reader_attn_modules = sorted(reader_attn_modules, key=lambda x: -x.norm1.normalized_shape[0])    
             writer_attn_modules = sorted(writer_attn_modules, key=lambda x: -x.norm1.normalized_shape[0])
             
-            # print('reader_attn_modules:',reader_attn_modules)
-            # print('writer_attn_modules:',writer_attn_modules)
             if len(reader_attn_modules) == 0:
                 print('reader_attn_modules is null')
                 assert False
