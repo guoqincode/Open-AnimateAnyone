@@ -16,6 +16,7 @@ pip install av==11.0.0
 pip install imageio==2.9.0
 pip install imageio-ffmpeg
 pip install gradio==3.41.2
+pip install xformers==0.0.16
 
 # If you need to download the model locally:
 conda install git-lfs
