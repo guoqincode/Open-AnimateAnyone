@@ -484,11 +484,9 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
 
         m, u = model.load_state_dict(state_dict, strict=False)
         print(f"### missing keys: {len(m)}; \n### unexpected keys: {len(u)} ###")
-        if len(m) ==0 or len(u) ==0:
+        if len(m) !=0 or len(u) !=0:
             print(f"### missing keys:\n{m}\n### unexpected keys:\n{u}\n ###")
         
-        params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
-        print(f"### Temporal Module Parameters: {sum(params) / 1e6} M ###")
         params = [p.numel() if "temporal" in n else 0 for n, p in model.named_parameters()]
         print(f"### Temporal Module Parameters: {sum(params) / 1e6} M ###")
         
