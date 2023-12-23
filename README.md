@@ -47,6 +47,12 @@ or you can:
 bash fast_env.sh
 ```
 
+## 🎬Gradio Demo (Published with weights.)
+```python
+python3 -m demo.gradio_animate
+```
+
+
 ## Training
 
 #### First Stage
@@ -61,19 +67,6 @@ torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_
 torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_stage_2.yaml
 ```
 
-## Inference
-
-#### First Stage
-
-```python
-python3 -m pipelines.animation_stage_1 --config configs/prompts/animation_stage_1.yaml
-```
-
-#### Second Stage
-
-```python
-python3 -m pipelines.animation_stage_2 --config configs/prompts/animation_stage_2.yaml
-```
 
 ## Acknowledgements
 Special thanks to the original authors of the [Animate Anyone](https://humanaigc.github.io/animate-anyone/) project and the contributors to the [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff) repository for their open research and foundational work that inspired this unofficial implementation.
