@@ -57,7 +57,7 @@ class ReferenceNetAttention():
             style_fidelity,
             reference_attn,
             # dtype=torch.float16,
-            dtype=torch.float32,
+            dtype=torch.float16,
             batch_size=1, 
             num_images_per_prompt=1, 
             device=torch.device("cpu"), 
@@ -131,8 +131,8 @@ class ReferenceNetAttention():
                     # print(f"#### norm_hidden_states #### {norm_hidden_states.size()}")
                     # print(f"#### self.bank #### {self.bank[0].size()}")
                     modify_norm_hidden_states = torch.cat([norm_hidden_states] + self.bank, dim=1)
-                    # print("########## modify_norm_hidden_states ",modify_norm_hidden_states.dtype,"  ##########") # torch.float32
-                    # print("########## self.bank[0] ",self.bank[0].dtype,"  ##########") # torch.float16 -> torch.float32
+                    # print("########## modify_norm_hidden_states ",modify_norm_hidden_states.dtype,"  ##########") # torch.float16
+                    # print("########## self.bank[0] ",self.bank[0].dtype,"  ##########") # torch.float16 -> torch.float16
                     # print(f"#### modify_norm_hidden_states #### {modify_norm_hidden_states.size()}")
                     hidden_states_uc = self.attn1(modify_norm_hidden_states, 
                                                 encoder_hidden_states=modify_norm_hidden_states,
@@ -235,7 +235,7 @@ class ReferenceNetAttention():
                 module.attn_weight = float(i) / float(len(attn_modules))
     
     # def update(self, writer, dtype=torch.float16):
-    def update(self, writer, dtype=torch.float32):
+    def update(self, writer, dtype=torch.float16):
         if self.reference_attn:
             if self.fusion_blocks == "midup":
                 reader_attn_modules = [module for module in (torch_dfs(self.unet.mid_block)+torch_dfs(self.unet.up_blocks)) if isinstance(module, _BasicTransformerBlock)]
