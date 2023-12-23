@@ -12,9 +12,10 @@ pip install safetensors==0.3.3
 pip install decord==0.6.0
 pip install wandb==0.16.1
 pip install accelerate==0.22.0
-pip install imageio==2.9.0
 pip install av==11.0.0
+pip install imageio==2.9.0
 pip install imageio-ffmpeg
+pip install gradio==3.41.2
 
 # If you need to download the model locally:
 conda install git-lfs
