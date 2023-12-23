@@ -40,9 +40,7 @@ In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 
 
 
 ## Requirements
-Same as [magic-animate](https://github.com/magic-research/magic-animate/tree/main).
 
-or you can:
 ```bash
 bash fast_env.sh
 ```
