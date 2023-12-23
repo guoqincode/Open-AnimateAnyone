@@ -13,7 +13,7 @@ The first training phase basic test passed, currently in training and testing th
 It only takes a few days to release the weights.😄
 
 ## Sample of Stage 1 Result on UBC-fashion dataset
-
+Special thanks to [Zhenzhi Wang](https://zhenzhiwang.github.io/) for assistance with code development and training.
 The current version of the face also has some artifacts.  Also, this is a model trained on a UBC dataset rather than a large-scale dataset.
 
 <table class="center">
