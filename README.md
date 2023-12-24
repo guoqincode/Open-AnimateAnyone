@@ -43,7 +43,7 @@ In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 
 bash fast_env.sh
 ```
 
-## 🎬Gradio Demo (Published with weights.)
+## 🎬Gradio Demo (will publish with weights.)
 ```python
 python3 -m demo.gradio_animate
 ```
