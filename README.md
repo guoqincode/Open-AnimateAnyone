@@ -48,6 +48,8 @@ bash fast_env.sh
 python3 -m demo.gradio_animate
 ```
 
+If you only have a GPU with 24 gigabytes of VRAM, I recommend inference at resolution 512 and below.
+
 
 ## Training
 
