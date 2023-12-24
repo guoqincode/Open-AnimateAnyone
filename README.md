@@ -54,13 +54,13 @@ python3 -m demo.gradio_animate
 #### First Stage
 
 ```python
-torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_stage_1.yaml
+torchrun --nnodes=8 --nproc_per_node=8 train.py --config configs/training/train_stage_1.yaml
 ```
 
 #### Second Stage
 
 ```python
-torchrun --nnodes=2 --nproc_per_node=8 train.py --config configs/training/train_stage_2.yaml
+torchrun --nnodes=8 --nproc_per_node=8 train.py --config configs/training/train_stage_2.yaml
 ```
 
 
