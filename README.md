@@ -3,7 +3,7 @@
 If you find this repository helpful, please consider giving us a star⭐!
 
 ## Overview
-This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff). This implementation is first developed by *Qin Guo* and then assisted by [Zhenzhi Wang](https://zhenzhiwang.github.io/).
+This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff). This implementation is first developed by [Qin Guo](https://github.com/guoqincode) and then assisted by [Zhenzhi Wang](https://zhenzhiwang.github.io/).
 
 ## News 🤗🤗🤗
 The first training phase basic test passed, currently in training and testing the second phase.
