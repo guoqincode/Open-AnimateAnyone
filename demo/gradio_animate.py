@@ -69,11 +69,22 @@ with gr.Blocks() as demo:
     gr.Markdown("## Examples")
     gr.Examples(
         examples=[
-            ["inputs/applications/source_image/91-9wEBqAlS.png", "inputs/applications/driving/dwpose/91-9wEBqAlS.mp4"], 
-            ["inputs/applications/source_image/91C+rpudhdS.png", "inputs/applications/driving/dwpose/91C+rpudhdS.mp4"],
-            ["inputs/applications/source_image/A11UTfKe+tS.png", "inputs/applications/driving/dwpose/A11UTfKe+tS.mp4"],
-            ["inputs/applications/source_image/A17AGFxllwS.png", "inputs/applications/driving/dwpose/A17AGFxllwS.mp4"],
-            ["inputs/applications/source_image/A18fOhsmJWS.png", "inputs/applications/driving/dwpose/A18fOhsmJWS.mp4"],
+            # ["inputs/applications/source_image/91-9wEBqAlS.png", "inputs/applications/driving/dwpose/91-9wEBqAlS.mp4"], 
+            # ["inputs/applications/source_image/91C+rpudhdS.png", "inputs/applications/driving/dwpose/91C+rpudhdS.mp4"],
+            # ["inputs/applications/source_image/A11UTfKe+tS.png", "inputs/applications/driving/dwpose/A11UTfKe+tS.mp4"],
+            # ["inputs/applications/source_image/A17AGFxllwS.png", "inputs/applications/driving/dwpose/A17AGFxllwS.mp4"],
+            # ["inputs/applications/source_image/A18fOhsmJWS.png", "inputs/applications/driving/dwpose/A18fOhsmJWS.mp4"],
+            # ["inputs/applications/source_image/91HzMhq7eOS.png", "inputs/applications/driving/dwpose/81FyMPk-WIS.mp4"],
+            # ["inputs/applications/source_image/A1dLq8J8cjS.png", "inputs/applications/driving/dwpose/91cqgHAeFJS.mp4"],
+            # ["inputs/applications/source_image/A1dLq8J8cjS.png", "inputs/applications/driving/dwpose/91hNaP-63aS.mp4"],
+            # ["inputs/applications/source_image/81FyMPk-WIS.png", "inputs/applications/driving/dwpose/81FyMPk-WIS.mp4"],
+
+            ["inputs/applications/source_image/91+20mY7UJS.png", "inputs/applications/driving/dwpose/91+20mY7UJS.mp4"],
+            ["inputs/applications/source_image/91+bCFG1jOS.png", "inputs/applications/driving/dwpose/91+bCFG1jOS.mp4"],
+            ["inputs/applications/source_image/91+bCFG1jOS.png", "inputs/applications/driving/dwpose/91+bCFG1jOS.mp4"],
+            ["inputs/applications/source_image/91+bCFG1jOS.png", "inputs/applications/driving/dwpose/00012_dwpose.mp4"],
+            ["inputs/applications/source_image/A18fOhsmJWS.png", "inputs/applications/driving/dwpose/00012_dwpose.mp4"],
+
         ],
         inputs=[reference_image, motion_sequence],
         outputs=animation,
