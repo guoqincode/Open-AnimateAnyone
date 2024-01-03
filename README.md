@@ -71,7 +71,7 @@ torchrun --nnodes=8 --nproc_per_node=8 train.py --config configs/training/train_
 torchrun --nnodes=8 --nproc_per_node=8 train.py --config configs/training/train_stage_2.yaml
 ```
 
-### Our Method (A more dense pose control scheme, the number of parameters is still small.)
+### Our Method (A more dense pose control scheme, the number of parameters is still small.) (Highly recommended)
 ```python
 torchrun --nnodes=8 --nproc_per_node=8 train_hack.py --config configs/training/train_stage_1.yaml
 ```
