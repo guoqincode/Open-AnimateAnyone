@@ -51,10 +51,11 @@ In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 
 bash fast_env.sh
 ```
 
-## 🎬Gradio Demo (will publish with weights.)
+## 🎬Gradio Demo
 ```python
 python3 -m demo.gradio_animate
 ```
+For resolution 256, 11G VRAM is required, and for resolution 512, 20G VRAM is required.
 
 ## Training
 ### Original AnimateAnyone Architecture (It is difficult to control pose when training on a small dataset.)
