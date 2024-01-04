@@ -16,8 +16,8 @@ from transformers import CLIPTextModel, CLIPTokenizer, CLIPProcessor
 from models.ReferenceEncoder import ReferenceEncoder
 from models.ReferenceNet import ReferenceNet
 
-# from models.hack_poseguider import Hack_PoseGuider as PoseGuider
-from models.hack_poseguider_v2 import Hack_PoseGuider as PoseGuider
+from models.hack_poseguider import Hack_PoseGuider as PoseGuider
+# from models.hack_poseguider_v2 import Hack_PoseGuider as PoseGuider
 from models.hack_unet3d import Hack_UNet3DConditionModel as UNet3DConditionModel
 from demo.gradio_pipeline import AnimationAnyonePipeline
 
