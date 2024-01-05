@@ -55,7 +55,7 @@ bash fast_env.sh
 ```python
 python3 -m demo.gradio_animate
 ```
-For resolution 256, 11G VRAM is required, and for resolution 512, 20G VRAM is required.
+For a 13-second pose video, processing at 256 resolution requires 11G VRAM, and at 512 resolution, it requires 23.5G VRAM.
 
 ## Training
 ### Original AnimateAnyone Architecture (It is difficult to control pose when training on a small dataset.)
