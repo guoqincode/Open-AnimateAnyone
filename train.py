@@ -182,7 +182,8 @@ def main(
     )
 
     if is_main_process and (not is_debug) and use_wandb:
-        run = wandb.init(project="AnimateAnyone train stage 1", name=folder_name, config=config)
+        stage = 1 if image_finetune else 2
+        run = wandb.init(project=f"AnimateAnyone train stage {stage}", name=folder_name, config=config)
 
     # Handle the output folder creation
     if is_main_process:
