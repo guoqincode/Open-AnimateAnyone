@@ -38,7 +38,7 @@ description: "train stage 2: video motion train"
 train_data:
   csv_path:     "/mnt/f/research/HumanVideo/AnimateAnyone-unofficial/data/TikTok_info.csv"
   video_folder: "/mnt/f/research/HumanVideo/TikTok_dataset"
-  sample_size:  256
+  sample_size:  512
   sample_stride: 4
   sample_n_frames: 16
   clip_model_path: "/mnt/f/research/HumanVideo/magic-animate/pretrained_models/clip-vit-base-patch32"
@@ -59,7 +59,8 @@ unet_checkpoint_path: ""
 
 fusion_blocks: "full"
 
-learning_rate:    1.e-4
+# learning_rate:    1.e-4
+learning_rate:    1.e-5
 train_batch_size: 1
 
 max_train_epoch:      -1
