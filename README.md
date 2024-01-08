@@ -87,3 +87,7 @@ torchrun --nnodes=8 --nproc_per_node=8 train_hack.py --config configs/training/t
 
 ## Acknowledgements
 Special thanks to the original authors of the [Animate Anyone](https://humanaigc.github.io/animate-anyone/) project and the contributors to the [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff) repository for their open research and foundational work that inspired this unofficial implementation.
+
+## Email
+
+For academic or business cooperation only: guoqin@stu.pku.edu.cn
