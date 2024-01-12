@@ -7,19 +7,14 @@ We only train on small-scale datasets (such as TikTok, UBC), and it is difficult
 ## Overview
 This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff). This implementation is first developed by [Qin Guo](https://github.com/guoqincode) and then assisted by [Zhenzhi Wang](https://zhenzhiwang.github.io/).
 
-# Training Guidance
+## Training Guidance
 Although we cannot use large-scale data to train the model, we can provide several training suggestions:
 1. In our experiments, the poseguider in the original paper of AnimateAnyone is very difficult to control pose, no matter what activation function we use (such as ReLU, SiLU), but the output channel is enlarged to 320 and added after conv_in (such as model.hack_poseguider ) is very effective, and at the same time, compared to controlnet, this solution is more lightweight (<1M para vs 400M para). But we still think that Controlnet is a good choice. Poseguider relies on unet that is fine-tuned at the same time and cannot be used immediately. Plug and play.
 2. In small-scale data sets (less than 2000 videos), stage1 can work very well (including generalization), but stage2 is data hungry. When the amount of data is low, artifacts and flickers can easily occur. Because we retrained unet in the first stage, the checkpoint of the original animatediff lost its effect, so a large number of high-quality data sets are needed to retrain the motion module of animatediff at this stage.
 3. Freezing unet is not a good choice as it will lose the texture information of the reference image.
 4. This is a data hungry task. We believe that scale up data quality and scale are often more valuable than modifying the tiny structure of the model. Data quantity and quality are very important!
+5. High-resolution training is very important, which affects the learning and reconstruction of details. The training resolution should not be greater than the inference resolution.
 
-## News 🤗🤗🤗
-The first training phase basic test passed, currently in training and testing the second phase.
-
-~~Training may be slow due to GPU shortage.😢~~
-
-It only takes a few days to release the weights.😄
 
 ## Sample of Result on UBC-fashion dataset
 ### Stage 1
