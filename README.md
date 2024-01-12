@@ -37,12 +37,6 @@ The training of stage2 is challenging due to artifacts in the background. We sel
 </table>
 <p style="margin-left: 2em; margin-top: -1em"></p>
 
-
-## Note !!!
-This project is under continuous development in part-time, there may be bugs in the code, welcome to correct them, I will optimize the code after the pre-trained model is released!
-
-In the current version, we recommend training on 8 or 16 A100,H100 (80G) at 512 or 768 resolution. **Low resolution (256,384) does not give good results!!!(VAE is very poor at reconstruction at low resolution.)**
-
 ## ToDo
 - [x] **Release Training Code.**
 - [x] **Release Inference Code.** 
