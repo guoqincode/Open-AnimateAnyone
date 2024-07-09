@@ -12,7 +12,7 @@ We only train on small-scale datasets (such as TikTok, UBC), and it is difficult
 |  Qin Guo    |  guoqin@stu.pku.edu.cn   |   guoqincode         |
 
 
-This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff). This implementation is first developed by [Qin Guo](https://github.com/guoqincode) and then assisted by [Zhenzhi Wang](https://zhenzhiwang.github.io/).
+This repository contains an simple and unofficial implementation of [Animate Anyone](https://humanaigc.github.io/animate-anyone/). This project is built upon [magic-animate](https://github.com/magic-research/magic-animate/tree/main) and [AnimateDiff](https://github.com/guoyww/AnimateDiff). This implementation is first developed by [Qin Guo](https://github.com/guoqincode) and then assisted by [Zhenzhi Wang](https://zhenzhiwang.github.io/) (for training).
 
 ## Training Guidance
 Although we cannot use large-scale data to train the model, we can provide several training suggestions:
