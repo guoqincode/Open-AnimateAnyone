@@ -7,7 +7,7 @@ We only train on small-scale datasets (such as TikTok, UBC), and it is difficult
 ## Overview
 **Author** 
 
-| Name | RUC Email | GitHub Username |
+| Name | Email | GitHub Username |
 | ---- | --------- | --------------- |
 |  Qin Guo    |  guoqin@stu.pku.edu.cn   |   guoqincode         |
 
